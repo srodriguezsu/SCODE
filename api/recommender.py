@@ -29,7 +29,7 @@ def calcular_balance(proporciones):
         return 0.0
     return 1.0 - np.std(proporciones)
 
-def recomendar_equipos(data: pd.DataFrame, team_size: int = 4, top_n: int = 10, tipos: list = None) -> list:
+def recomendar_equipos(data: pd.DataFrame, team_size: int = 4, top_n: int = 10, tipos: list = None, on_progress = None) -> list:
     """
     Recommend teams based on diversity, dominance, and balance calculations.
     Uses the loaded Decision Tree model to predict cohesion indices in a batch.
@@ -43,7 +43,8 @@ def recomendar_equipos(data: pd.DataFrame, team_size: int = 4, top_n: int = 10, 
         ]
         
     comb_indices = list(combinations(data.index, team_size))
-    logger.info(f"Total combinations to evaluate: {len(comb_indices)}")
+    total_combinations = len(comb_indices)
+    logger.info(f"Total combinations to evaluate: {total_combinations}")
     if not comb_indices:
         return []
         
@@ -55,7 +56,10 @@ def recomendar_equipos(data: pd.DataFrame, team_size: int = 4, top_n: int = 10, 
     balances = []
     team_ids = []
     
-    for combo in comb_indices:
+    for idx, combo in enumerate(comb_indices):
+        if on_progress and idx > 0 and idx % 25000 == 0:
+            on_progress(idx, total_combinations)
+            
         combo_factors = [factors[i] for i in combo]
         combo_ids = [ids[i] for i in combo]
         
@@ -72,6 +76,9 @@ def recomendar_equipos(data: pd.DataFrame, team_size: int = 4, top_n: int = 10, 
         dominancias.append(dominancia)
         balances.append(balance)
         team_ids.append(combo_ids)
+        
+    if on_progress:
+        on_progress(total_combinations, total_combinations)
         
     # Build dataframe for batch prediction
     X = pd.DataFrame({

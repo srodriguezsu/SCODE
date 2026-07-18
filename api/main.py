@@ -61,7 +61,7 @@ async def recommend_teams_endpoint(
     
     return {
         "status": "processing",
-        "message": "Team recommendation request received. Connect to WebSocket /ws/{task_id} to track progress.",
+        "message": "Petición de recomendación de equipos recibida. Conéctese al WebSocket /ws/{task_id} para seguir el progreso.",
         "task_id": task_id
     }
 
@@ -71,17 +71,10 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
     WebSocket endpoint to receive real-time updates for a running recommendation task.
     """
     logger.info(f"WebSocket client attempting to connect for task: {task_id}")
-    await manager.connect(task_id, websocket)
-    
-    # Send a quick connection confirmation message
     try:
-        await websocket.send_json({
-            "status": "connected",
-            "message": f"Connected to recommendation updates for task {task_id}."
-        })
+        await manager.connect(task_id, websocket)
     except Exception as e:
-        logger.error(f"Failed to send connection confirmation: {str(e)}")
-        manager.disconnect(task_id, websocket)
+        logger.error(f"Failed to connect WebSocket for task {task_id}: {str(e)}")
         return
         
     try:

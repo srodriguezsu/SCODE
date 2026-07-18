@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCODE Recommendation Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080b11;
+            --card-bg: rgba(17, 22, 34, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.35);
+            --accent: #06b6d4;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --error-glow: rgba(239, 68, 68, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 2.5rem 1.5rem;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 850px) {
+            main {
+                grid-template-columns: 420px 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group:last-of-type {
+            margin-bottom: 1.75rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.025em;
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        textarea {
+            width: 100%;
+            background: rgba(8, 11, 17, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, 
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.85rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #272a37;
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            filter: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-connecting {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            display: inline-block;
+        }
+
+        .pulse {
+            animation: pulse-anim 1.5s infinite;
+        }
+
+        @keyframes pulse-anim {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .console {
+            background: #05070c;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: #a7f3d0;
+            overflow-y: auto;
+            max-height: 220px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .console-line {
+            line-height: 1.4;
+            border-left: 2px solid transparent;
+            padding-left: 8px;
+        }
+
+        .console-line.info { border-left-color: var(--accent); color: var(--text-primary); }
+        .console-line.success { border-left-color: var(--success); color: var(--success); }
+        .console-line.warning { border-left-color: var(--warning); color: var(--warning); }
+        .console-line.error { border-left-color: var(--error); color: var(--error); }
+        .console-line.system { border-left-color: var(--primary); color: var(--text-secondary); }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .team-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .team-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .cohesion-metric {
+            background: var(--primary-glow);
+            color: #c7d2fe;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+
+        .member-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .member-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            transition: width 0.4s ease;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SCODE Cohesion Recommender</h1>
+        <p class="subtitle">Asynchronous team building optimization with real-time WebSocket telemetry.</p>
+    </header>
+
+    <main>
+        <!-- Control Card -->
+        <section class="card" style="height: fit-content;">
+            <div class="section-title">Configuration</div>
+            
+            <div class="form-group">
+                <label for="apiUrl">API Server URL</label>
+                <input type="text" id="apiUrl" value="http://localhost:8000" placeholder="e.g. http://localhost:8000">
+            </div>
+
+            <div class="form-group">
+                <label for="wsUrl">WebSocket URL</label>
+                <input type="text" id="wsUrl" value="ws://localhost:8000" placeholder="e.g. ws://localhost:8000">
+            </div>
+
+            <div class="form-group">
+                <label for="projectId">Project ID</label>
+                <input type="number" id="projectId" value="1" placeholder="e.g. 1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="jwtToken">JWT Token (Authorization Header)</label>
+                <textarea id="jwtToken" placeholder="Paste your Bearer JWT token here..."></textarea>
+            </div>
+
+            <button id="btnRun">Run Team Recommendation</button>
+        </section>
+
+        <!-- Status & Results Console -->
+        <section class="results-container">
+            <div class="card" style="flex: 1;">
+                <div class="section-title">
+                    <span>Live Telemetry</span>
+                    <span id="wsStatus" class="status-badge badge-disconnected">
+                        <span class="dot"></span>
+                        <span class="status-text">WS Offline</span>
+                    </span>
+                </div>
+
+                <div class="progress-bar-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div class="console" id="console">
+                    <div class="console-line system">Dashboard loaded. Ready to run recommendation tasks.</div>
+                </div>
+            </div>
+
+            <div class="card" style="flex: 2;">
+                <div class="section-title">Recommended Teams</div>
+                <div class="team-grid" id="teamGrid">
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No recommendations generated yet. Set configurations and press Run.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const btnRun = document.getElementById('btnRun');
+        const projectIdInput = document.getElementById('projectId');
+        const jwtInput = document.getElementById('jwtToken');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const wsUrlInput = document.getElementById('wsUrl');
+        const consoleEl = document.getElementById('console');
+        const wsStatusEl = document.getElementById('wsStatus');
+        const teamGridEl = document.getElementById('teamGrid');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+
+        let ws = null;
+
+        function logToConsole(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const time = new Date().toLocaleTimeString();
+            line.innerHTML = `<span style="color: var(--text-secondary)">[${time}]</span> ${message}`;
+            consoleEl.appendChild(line);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function updateWsStatus(status) {
+            const statusText = wsStatusEl.querySelector('.status-text');
+            const dot = wsStatusEl.querySelector('.dot');
+            
+            wsStatusEl.className = 'status-badge';
+            dot.className = 'dot';
+
+            if (status === 'connected') {
+                wsStatusEl.classList.add('badge-connected');
+                statusText.innerText = 'WS Connected';
+                dot.classList.add('pulse');
+            } else if (status === 'connecting') {
+                wsStatusEl.classList.add('badge-connecting');
+                statusText.innerText = 'WS Connecting';
+                dot.classList.add('pulse');
+            } else {
+                wsStatusEl.classList.add('badge-disconnected');
+                statusText.innerText = 'WS Offline';
+            }
+        }
+
+        function setProgress(percentage) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        function hideProgress() {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+        }
+
+        function mapStatusToProgress(status) {
+            switch(status) {
+                case 'started': return 20;
+                case 'fetching_data': return 40;
+                case 'fetching_factors': return 60;
+                case 'running_model': return 80;
+                case 'saving_teams': return 95;
+                case 'completed': return 100;
+                default: return 0;
+            }
+        }
+
+        function displayTeams(teams) {
+            teamGridEl.innerHTML = '';
+            
+            if (!teams || teams.length === 0) {
+                teamGridEl.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No teams returned.
+                    </div>
+                `;
+                return;
+            }
+
+            teams.forEach((team, index) => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'team-card';
+                
+                // Collect member ID strings
+                // Check if api response structure has 'members' or we just show employee_ids
+                const members = team.members && team.members.length > 0 
+                    ? team.members.map(m => `Emp #${m.employee_id || m}`) 
+                    : (team.employee_ids || []).map(id => `Emp #${id}`);
+
+                const memberBadges = members.length > 0
+                    ? members.map(m => `<span class="member-badge">${m}</span>`).join('')
+                    : `<span class="member-badge" style="color: var(--error)">No members info returned</span>`;
+
+                teamCard.innerHTML = `
+                    <div class="team-header">
+                        <span class="team-title">Recommended Team #${index + 1}</span>
+                        <span class="cohesion-metric">${(team.predicted_cohesion_index * 100).toFixed(1)}% Cohesion</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        Project ID: ${team.project_id} | DB ID: ${team.id}
+                    </div>
+                    <div class="member-list">
+                        ${memberBadges}
+                    </div>
+                `;
+                teamGridEl.appendChild(teamCard);
+            });
+        }
+
+        btnRun.addEventListener('click', async () => {
+            const projectId = projectIdInput.value;
+            let jwt = jwtInput.value.trim();
+            const apiUrl = apiUrlInput.value.trim();
+            const wsUrl = wsUrlInput.value.trim();
+
+            if (!projectId) {
+                alert('Please provide a valid Project ID.');
+                return;
+            }
+
+            if (!jwt) {
+                alert('Please provide a valid Authorization JWT token.');
+                return;
+            }
+
+            // Standardize JWT token with Bearer prefix if user did not type it
+            if (!jwt.toLowerCase().startsWith('bearer ')) {
+                jwt = `Bearer ${jwt}`;
+            }
+
+            btnRun.disabled = true;
+            teamGridEl.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    Generating combinations... please wait.
+                </div>
+            `;
+            setProgress(5);
+            logToConsole(`Initiating recommendation HTTP POST to project ${projectId}...`, 'info');
+
+            try {
+                const response = await fetch(`${apiUrl}/projects/${projectId}/recommend`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': jwt,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errDetail = await response.json().catch(() => ({}));
+                    throw new Error(errDetail.detail || `Server responded with HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const taskId = data.task_id;
+                logToConsole(`HTTP Response OK: ${data.message}`, 'success');
+                logToConsole(`Task ID generated: ${taskId}`, 'system');
+
+                // Connect to WebSocket using the task ID
+                connectWebSocket(wsUrl, taskId);
+
+            } catch (err) {
+                logToConsole(err.message, 'error');
+                btnRun.disabled = false;
+                hideProgress();
+                teamGridEl.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--error)">
+                        Failed to start: ${err.message}
+                    </div>
+                `;
+            }
+        });
+
+        function connectWebSocket(wsBaseUrl, taskId) {
+            const wsUrl = `${wsBaseUrl}/ws/${taskId}`;
+            logToConsole(`Establishing WebSocket telemetry link at ${wsUrl}...`, 'info');
+            updateWsStatus('connecting');
+
+            if (ws) {
+                ws.close();
+            }
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                logToConsole('WebSocket connected successfully.', 'success');
+                updateWsStatus('connected');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    
+                    if (msg.status === 'connected') {
+                        logToConsole(`Telemetry handshake: ${msg.message}`, 'system');
+                        return;
+                    }
+
+                    // Map other message states
+                    const progress = mapStatusToProgress(msg.status);
+                    setProgress(progress);
+
+                    if (msg.status === 'failed') {
+                        logToConsole(`Task execution failed: ${msg.message}`, 'error');
+                        btnRun.disabled = false;
+                        updateWsStatus('offline');
+                        ws.close();
+                        teamGridEl.innerHTML = `
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--error)">
+                                Failed during execution: ${msg.message}
+                            </div>
+                        `;
+                    } else if (msg.status === 'completed') {
+                        logToConsole(`Success: ${msg.message}`, 'success');
+                        logToConsole(`Received ${msg.teams.length} saved teams details.`, 'system');
+                        displayTeams(msg.teams);
+                        btnRun.disabled = false;
+                        updateWsStatus('offline');
+                        ws.close();
+                    } else {
+                        logToConsole(msg.message, 'info');
+                    }
+
+                } catch (e) {
+                    logToConsole(`Failed parsing WebSocket message: ${event.data}`, 'warning');
+                }
+            };
+
+            ws.onerror = (error) => {
+                logToConsole(`WebSocket connection error. Check server status and URL.`, 'error');
+                updateWsStatus('offline');
+                btnRun.disabled = false;
+            };
+
+            ws.onclose = () => {
+                logToConsole('WebSocket connection closed.', 'system');
+                updateWsStatus('offline');
+                btnRun.disabled = false;
+            };
+        }
+    </script>
+</body>
+</html>

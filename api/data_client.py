@@ -41,5 +41,16 @@ async def create_team(project_id: int, predicted_cohesion_index: float, employee
             },
             headers={"Authorization": auth_header}
         )
-        response.raise_for_status()
+        if response.status_code >= 400:
+            try:
+                err_data = response.json()
+                detail = err_data.get("detail", response.text)
+            except Exception:
+                detail = response.text
+            logger.error(f"Failed to post team to {url}. Status: {response.status_code}, Detail: {detail}")
+            raise httpx.HTTPStatusError(
+                f"Client error '{response.status_code} {response.reason_phrase}' for url '{url}'. Message: {detail}",
+                request=response.request,
+                response=response
+            )
         return response.json()

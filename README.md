@@ -198,3 +198,20 @@ Se incluye un panel web interactivo [test_client.html](file:///home/sebas/UNAL/s
 3. Haz clic en **Run Team Recommendation** para presenciar el ciclo de telemetría y ver los equipos resultantes en tarjetas interactivas de diseño moderno.
 
 ---
+
+## Poblar la Base de Datos con Datos de Prueba
+
+Se incluye un script utilitario [populate_data.py](file:///home/sebas/UNAL/seminario-2/mvp/SCODE/populate_data.py) para cargar masivamente los registros de estudiantes y habilidades del conjunto de datos CSV en la base de datos a través del API remoto.
+
+Para ejecutarlo:
+1. Asegúrate de que el entorno virtual esté activo.
+2. Ejecuta:
+   ```bash
+   .venv/bin/python populate_data.py
+   ```
+3. Sigue las instrucciones interactivas del prompt para ingresar:
+   - Tu **token JWT** de autorización.
+   - El **ID de Habilidad** (por ejemplo, `8` para el color test de predominancia).
+   - El **límite de registros** a procesar (presiona Enter si deseas subir todos los registros del CSV).
+
+---

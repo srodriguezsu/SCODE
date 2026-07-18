@@ -1,0 +1,96 @@
+Enum "skills_type_enum" {
+  "hard"
+  "soft"
+}
+
+Enum "skills_factor_type_enum" {
+  "numeric"
+  "categorical"
+}
+
+Table "employees" {
+  "national_id" varchar(15) [not null]
+  "name" varchar(255)
+  "last_name" varchar(255)
+  "id" int(11) [pk, not null]
+  "tenant_id" varchar(255) [not null]
+}
+
+Table "employee_skill" {
+  "employee_id" int(11) [not null]
+  "skill_id" int(11) [not null]
+  "factor" varchar(10)
+
+  Indexes {
+    (employee_id, skill_id) [pk]
+  }
+}
+
+Table "projects" {
+  "name" varchar(50)
+  "description" varchar(255)
+  "max_teams" int(11)
+  "min_team_size" int(11)
+  "max_team_size" int(11)
+  "id" int(11) [pk, not null]
+  "tenant_id" varchar(255) [not null]
+  "created_at" datetime [not null]
+  "updated_at" datetime [not null]
+}
+
+Table "project_skill" {
+  "project_id" int(11) [not null]
+  "skill_id" int(11) [not null]
+
+  Indexes {
+    (project_id, skill_id) [pk]
+  }
+}
+
+Table "skills" {
+  "name" varchar(255) [not null]
+  "type" skills_type_enum
+  "factor_type" skills_factor_type_enum
+  "id" int(11) [pk, not null]
+  "tenant_id" varchar(255) [not null]
+}
+
+Table "teams" {
+  "project_id" int(11) [not null]
+  "id" int(11) [pk, not null]
+  "tenant_id" varchar(255) [not null]
+  "created_at" datetime [not null]
+}
+
+Table "team_members" {
+  "team_id" int(11) [not null]
+  "employee_id" int(11) [not null]
+
+  Indexes {
+    (team_id, employee_id) [pk]
+  }
+}
+
+Table "user" {
+  "id" char(32) [pk, not null]
+  "email" varchar(255) [not null]
+  "hashed_password" varchar(255) [not null]
+  "is_active" tinyint(1) [not null]
+  "is_superuser" tinyint(1) [not null]
+  "is_verified" tinyint(1) [not null]
+  "tenant_id" varchar(255) [not null]
+}
+
+Ref "employee_skill_ibfk_1":"employees"."id" < "employee_skill"."employee_id"
+
+Ref "employee_skill_ibfk_2":"skills"."id" < "employee_skill"."skill_id"
+
+Ref "project_skill_ibfk_1":"projects"."id" < "project_skill"."project_id"
+
+Ref "project_skill_ibfk_2":"skills"."id" < "project_skill"."skill_id"
+
+Ref "teams_ibfk_1":"projects"."id" < "teams"."project_id"
+
+Ref "team_members_ibfk_1":"teams"."id" < "team_members"."team_id"
+
+Ref "team_members_ibfk_2":"employees"."id" < "team_members"."employee_id"

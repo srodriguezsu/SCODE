@@ -35,11 +35,13 @@ async def run_recommendation_flow(task_id: str, project_id: int, soft_skill_id: 
         })
         
         # Get hard skills from the project
-        hard_skills_ids = [
-            skill["id"] for skill in project.get("skills", [])
+        hard_skills = [
+            skill for skill in project.get("skills", [])
             if skill.get("type") == "hard"
         ]
-        logger.info(f"Project hard skills: {hard_skills_ids}")
+        hard_skills_ids = [skill["id"] for skill in hard_skills]
+        hard_skills_names = [skill.get("name", f"ID {skill['id']}") for skill in hard_skills]
+        logger.info(f"Project hard skills: {hard_skills_names}")
         
         # Step 3: Fetch employees with specific soft/hard skills
         employees = await fetch_employees(
@@ -53,6 +55,7 @@ async def run_recommendation_flow(task_id: str, project_id: int, soft_skill_id: 
             raise ValueError("El API de datos retornó una lista vacía de empleados para los filtros proporcionados.")
             
         # Collect employees and extract the factor for the requested soft skill
+        soft_skill_name = f"ID {soft_skill_id}"
         processed_employees = []
         for emp in employees:
             skills = emp.get("skills", [])
@@ -61,27 +64,28 @@ async def run_recommendation_flow(task_id: str, project_id: int, soft_skill_id: 
             # Find the soft skill with matching id
             soft_skill = next((s for s in skills if s.get("id") == soft_skill_id), None)
             if soft_skill:
+                soft_skill_name = soft_skill.get("name", soft_skill_name)
                 processed_employees.append({
                     "ID": emp["id"],
                     "Color Test de predominancia": soft_skill.get("factor")
                 })
                 
-        logger.info(f"Filtered {len(processed_employees)} employees out of {len(employees)} based on soft skill ID {soft_skill_id}")
+        logger.info(f"Filtered {len(processed_employees)} employees out of {len(employees)} based on soft skill: '{soft_skill_name}'")
         
         if len(processed_employees) < team_size:
             raise ValueError(
-                f"No hay suficientes empleados (se encontraron {len(processed_employees)}) con la habilidad blanda {soft_skill_id} "
+                f"No hay suficientes empleados (se encontraron {len(processed_employees)}) con la habilidad blanda '{soft_skill_name}' "
                 f"para formar equipos de tamaño {team_size}."
             )
             
         # Step 4: Fetch factors for this skill ID (replaces TIPOS)
         await manager.broadcast_to_task(task_id, {
             "status": "fetching_factors",
-            "message": f"Paso 3/5: Obteniendo los factores para la habilidad con ID {soft_skill_id}..."
+            "message": f"Paso 3/5: Obteniendo los factores para la habilidad '{soft_skill_name}'..."
         })
         
         tipos = await fetch_skills_factors(soft_skill_id, auth_header)
-        logger.info(f"Skill factors fetched: {tipos}")
+        logger.info(f"Skill factors fetched for '{soft_skill_name}': {tipos}")
         
         # Step 5: Prepare DataFrame and run recommendation algorithm
         df_data = pd.DataFrame(processed_employees)
@@ -91,7 +95,7 @@ async def run_recommendation_flow(task_id: str, project_id: int, soft_skill_id: 
         
         await manager.broadcast_to_task(task_id, {
             "status": "running_model",
-            "message": f"Paso 4/5: Inicializando ejecución del modelo. Se filtraron {len(df_data)} empleados con el ID de habilidad {soft_skill_id}. Total de combinaciones a evaluar: {total_combinations:,}."
+            "message": f"Paso 4/5: Inicializando ejecución del modelo. Se filtraron {len(df_data)} empleados con la habilidad '{soft_skill_name}'. Total de combinaciones a evaluar: {total_combinations:,}."
         })
         
         loop = asyncio.get_running_loop()

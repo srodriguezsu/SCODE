@@ -375,17 +375,22 @@
             
             <div class="form-group">
                 <label for="apiUrl">API Server URL</label>
-                <input type="text" id="apiUrl" value="http://localhost:8000" placeholder="e.g. http://localhost:8000">
+                <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="e.g. http://localhost:8080">
             </div>
 
             <div class="form-group">
                 <label for="wsUrl">WebSocket URL</label>
-                <input type="text" id="wsUrl" value="ws://localhost:8000" placeholder="e.g. ws://localhost:8000">
+                <input type="text" id="wsUrl" value="ws://localhost:8080" placeholder="e.g. ws://localhost:8080">
             </div>
 
             <div class="form-group">
                 <label for="projectId">Project ID</label>
                 <input type="number" id="projectId" value="1" placeholder="e.g. 1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="softSkillId">Soft Skill ID</label>
+                <input type="number" id="softSkillId" value="8" placeholder="e.g. 8" min="1">
             </div>
 
             <div class="form-group">
@@ -430,6 +435,7 @@
     <script>
         const btnRun = document.getElementById('btnRun');
         const projectIdInput = document.getElementById('projectId');
+        const softSkillIdInput = document.getElementById('softSkillId');
         const jwtInput = document.getElementById('jwtToken');
         const apiUrlInput = document.getElementById('apiUrl');
         const wsUrlInput = document.getElementById('wsUrl');
@@ -537,12 +543,18 @@
 
         btnRun.addEventListener('click', async () => {
             const projectId = projectIdInput.value;
+            const softSkillId = softSkillIdInput.value;
             let jwt = jwtInput.value.trim();
             const apiUrl = apiUrlInput.value.trim();
             const wsUrl = wsUrlInput.value.trim();
 
             if (!projectId) {
                 alert('Please provide a valid Project ID.');
+                return;
+            }
+
+            if (!softSkillId) {
+                alert('Please provide a valid Soft Skill ID.');
                 return;
             }
 
@@ -563,10 +575,10 @@
                 </div>
             `;
             setProgress(5);
-            logToConsole(`Initiating recommendation HTTP POST to project ${projectId}...`, 'info');
+            logToConsole(`Initiating recommendation HTTP POST to project ${projectId} (soft skill: ${softSkillId})...`, 'info');
 
             try {
-                const response = await fetch(`${apiUrl}/projects/${projectId}/recommend`, {
+                const response = await fetch(`${apiUrl}/projects/${projectId}/recommend?soft_skill_id=${softSkillId}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': jwt,

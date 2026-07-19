@@ -20,7 +20,7 @@ def test_client():
     # Wait for server to boot
     time.sleep(3)
     
-    ws_url = "ws://127.0.0.1:8000/ws/test-task-id-999"
+    ws_url = "ws://127.0.0.1:8080/ws/test-task-id-999"
     print(f"[Client] Connecting to {ws_url}...")
     
     try:

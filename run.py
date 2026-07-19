@@ -10,4 +10,4 @@ if __name__ == "__main__":
     os.environ["PYTHONPATH"] = current_dir
 
     print("Starting SCODE Recommender API server...")
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8080, reload=True)

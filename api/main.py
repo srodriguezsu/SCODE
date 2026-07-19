@@ -35,6 +35,7 @@ def read_root():
 async def recommend_teams_endpoint(
     project_id: int,
     background_tasks: BackgroundTasks,
+    soft_skill_id: int,
     authorization: Optional[str] = Header(None)
 ):
     """
@@ -49,13 +50,14 @@ async def recommend_teams_endpoint(
         )
         
     task_id = str(uuid.uuid4())
-    logger.info(f"Received recommendation request for project: {project_id}. Task ID assigned: {task_id}")
+    logger.info(f"Received recommendation request for project: {project_id} (soft_skill_id: {soft_skill_id}). Task ID assigned: {task_id}")
     
     # Schedule the recommendation flow in the background
     background_tasks.add_task(
         run_recommendation_flow,
         task_id=task_id,
         project_id=project_id,
+        soft_skill_id=soft_skill_id,
         auth_header=authorization
     )
     

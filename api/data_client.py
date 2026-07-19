@@ -12,13 +12,30 @@ async def fetch_project(project_id: int, auth_header: str) -> dict:
         response.raise_for_status()
         return response.json()
 
-async def fetch_employees(auth_header: str) -> list:
+async def fetch_employees(
+    auth_header: str,
+    soft_skills_ids: list = None,
+    hard_skills_ids: list = None,
+    match_all_hard: bool = False,
+    match_all_soft: bool = False
+) -> list:
     url = f"{DATA_API_BASE_URL}/employees/"
-    logger.info(f"Fetching employees from {url}")
+    params = []
+    if soft_skills_ids:
+        for sid in soft_skills_ids:
+            params.append(("soft_skills_ids", str(sid)))
+    if hard_skills_ids:
+        for hid in hard_skills_ids:
+            params.append(("hard_skills_ids", str(hid)))
+    params.append(("match_all_hard", "true" if match_all_hard else "false"))
+    params.append(("match_all_soft", "true" if match_all_soft else "false"))
+    
+    logger.info(f"Fetching employees from {url} with params: {params}")
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers={"Authorization": auth_header})
+        response = await client.get(url, params=params, headers={"Authorization": auth_header})
         response.raise_for_status()
         return response.json()
+
 
 async def fetch_skills_factors(skill_id: int, auth_header: str) -> list:
     url = f"{DATA_API_BASE_URL}/skills/{skill_id}/factors"
